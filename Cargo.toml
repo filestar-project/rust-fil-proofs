@@ -8,5 +8,4 @@ members = [
   "storage-proofs/post",
   "fil-proofs-tooling",
   "sha2raw",
-  "phase2",
 ]
