@@ -9,8 +9,6 @@ use neptune::poseidon::PoseidonConstants;
 use serde::de::DeserializeOwned;
 use serde::ser::Serialize;
 
-use crate::error::Result;
-
 pub type PoseidonBinaryArity = U2;
 pub type PoseidonQuadArity = U4;
 pub type PoseidonOctArity = U8;
@@ -115,9 +113,9 @@ pub trait Domain:
     + std::hash::Hash
 {
     fn into_bytes(&self) -> Vec<u8>;
-    fn try_from_bytes(raw: &[u8]) -> Result<Self>;
+    fn try_from_bytes(raw: &[u8]) -> anyhow::Result<Self>;
     /// Write itself into the given slice, LittleEndian bytes.
-    fn write_bytes(&self, _: &mut [u8]) -> Result<()>;
+    fn write_bytes(&self, _: &mut [u8]) -> anyhow::Result<()>;
 
     fn random<R: rand::RngCore>(rng: &mut R) -> Self;
 }
@@ -200,9 +198,6 @@ pub trait HashFunction<T: Domain>:
 pub trait Hasher: Clone + ::std::fmt::Debug + Eq + Default + Send + Sync {
     type Domain: Domain + LightHashable<Self::Function> + AsRef<Self::Domain>;
     type Function: HashFunction<Self::Domain>;
-
-    fn sloth_encode(key: &Self::Domain, ciphertext: &Self::Domain) -> Result<Self::Domain>;
-    fn sloth_decode(key: &Self::Domain, ciphertext: &Self::Domain) -> Result<Self::Domain>;
 
     fn name() -> String;
 }

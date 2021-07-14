@@ -13,7 +13,6 @@ use rand::RngCore;
 use serde::{Deserialize, Serialize};
 
 use super::{Domain, HashFunction, Hasher};
-use crate::crypto::sloth;
 use crate::error::*;
 use crate::gadgets::multipack;
 
@@ -26,19 +25,6 @@ impl Hasher for Blake2sHasher {
 
     fn name() -> String {
         "Blake2sHasher".into()
-    }
-
-    fn sloth_encode(key: &Self::Domain, ciphertext: &Self::Domain) -> Result<Self::Domain> {
-        // TODO: validate this is how sloth should work in this case
-        let k = (*key).into();
-        let c = (*ciphertext).into();
-
-        Ok(sloth::encode(&k, &c).into())
-    }
-
-    fn sloth_decode(key: &Self::Domain, ciphertext: &Self::Domain) -> Result<Self::Domain> {
-        // TODO: validate this is how sloth should work in this case
-        Ok(sloth::decode(&(*key).into(), &(*ciphertext).into()).into())
     }
 }
 

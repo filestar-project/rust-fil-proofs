@@ -1,7 +1,5 @@
 use std::hash::Hasher as StdHasher;
 
-use crate::crypto::sloth;
-use crate::error::{Error, Result};
 use crate::hasher::types::{
     PoseidonArity, PoseidonMDArity, POSEIDON_CONSTANTS_16, POSEIDON_CONSTANTS_2,
     POSEIDON_CONSTANTS_4, POSEIDON_CONSTANTS_8, POSEIDON_MD_CONSTANTS,
@@ -29,23 +27,6 @@ impl Hasher for PoseidonHasher {
 
     fn name() -> String {
         "poseidon_hasher".into()
-    }
-
-    #[inline]
-    fn sloth_encode(key: &Self::Domain, ciphertext: &Self::Domain) -> Result<Self::Domain> {
-        // Unrapping here is safe; `Fr` elements and hash domain elements are the same byte length.
-        let key = Fr::from_repr(key.0)?;
-        let ciphertext = Fr::from_repr(ciphertext.0)?;
-        Ok(sloth::encode(&key, &ciphertext).into())
-    }
-
-    #[inline]
-    fn sloth_decode(key: &Self::Domain, ciphertext: &Self::Domain) -> Result<Self::Domain> {
-        // Unrapping here is safe; `Fr` elements and hash domain elements are the same byte length.
-        let key = Fr::from_repr(key.0)?;
-        let ciphertext = Fr::from_repr(ciphertext.0)?;
-
-        Ok(sloth::decode(&key, &ciphertext).into())
     }
 }
 
@@ -151,15 +132,18 @@ impl Domain for PoseidonDomain {
         out
     }
 
-    fn try_from_bytes(raw: &[u8]) -> Result<Self> {
-        ensure!(raw.len() == PoseidonDomain::byte_len(), Error::BadFrBytes);
+    fn try_from_bytes(raw: &[u8]) -> anyhow::Result<Self> {
+        ensure!(
+            raw.len() == PoseidonDomain::byte_len(),
+            "invalid amount of bytes"
+        );
         let mut res: FrRepr = Default::default();
         res.read_le(raw)?;
 
         Ok(PoseidonDomain(res))
     }
 
-    fn write_bytes(&self, dest: &mut [u8]) -> Result<()> {
+    fn write_bytes(&self, dest: &mut [u8]) -> anyhow::Result<()> {
         self.0.write_le(dest)?;
         Ok(())
     }

@@ -1,17 +1,18 @@
 use std::marker::PhantomData;
 
 use anyhow::ensure;
+use bellperson::{Circuit, ConstraintSystem, SynthesisError};
 use bellperson::bls::{Bls12, Fr};
 use bellperson::gadgets::num;
-use bellperson::{Circuit, ConstraintSystem, SynthesisError};
+
+use fr32::u64_into_fr;
 use storage_proofs_core::{
     compound_proof::{CircuitComponent, CompoundProof},
     drgraph::Graph,
     error::Result,
-    fr32::u64_into_fr,
     gadgets::constraint,
     gadgets::por::PoRCompound,
-    hasher::{HashFunction, Hasher},
+    hasher::{Hasher, HashFunction},
     merkle::{BinaryMerkleTree, MerkleTreeTrait},
     parameter_cache::{CacheableParameters, ParameterSetMetadata},
     por,
@@ -19,8 +20,9 @@ use storage_proofs_core::{
     util::reverse_bit_numbering,
 };
 
-use super::params::Proof;
 use crate::stacked::StackedDrg;
+
+use super::params::Proof;
 
 /// Stacked DRG based Proof of Replication.
 ///
@@ -339,31 +341,32 @@ fn generate_inclusion_inputs<Tree: 'static + MerkleTreeTrait>(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use bellperson::util_cs::{metric_cs::MetricCS, test_cs::TestConstraintSystem};
     use ff::Field;
     use generic_array::typenum::{U0, U2, U4, U8};
     use merkletree::store::StoreConfig;
     use rand::{Rng, SeedableRng};
     use rand_xorshift::XorShiftRng;
+
+    use fr32::fr_into_bytes;
     use storage_proofs_core::{
         cache_key::CacheKey,
         compound_proof,
         drgraph::BASE_DEGREE,
-        fr32::fr_into_bytes,
         hasher::{Hasher, PoseidonHasher, Sha256Hasher},
-        merkle::{get_base_tree_count, DiskTree, MerkleTreeTrait},
+        merkle::{DiskTree, get_base_tree_count, MerkleTreeTrait},
         proof::ProofScheme,
         test_helper::setup_replica,
         util::default_rows_to_discard,
     };
 
-    use crate::stacked::{
-        ChallengeRequirements, LayerChallenges, PrivateInputs, PublicInputs, SetupParams,
-        TemporaryAux, TemporaryAuxCache, BINARY_ARITY, EXP_DEGREE,
-    };
     use crate::PoRep;
+    use crate::stacked::{
+        BINARY_ARITY, ChallengeRequirements, EXP_DEGREE, LayerChallenges, PrivateInputs,
+        PublicInputs, SetupParams, TemporaryAux, TemporaryAuxCache,
+    };
+
+    use super::*;
 
     #[test]
     fn stacked_input_circuit_poseidon_base_2() {

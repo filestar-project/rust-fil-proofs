@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use anyhow::{ensure, Context};
+use anyhow::{Context, ensure};
 use bellperson::bls::{Bls12, Fr};
 use bellperson::Circuit;
 use generic_array::typenum;
@@ -279,19 +279,18 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use bellperson::util_cs::{metric_cs::MetricCS, test_cs::TestConstraintSystem};
     use ff::Field;
     use merkletree::store::StoreConfig;
     use pretty_assertions::assert_eq;
     use rand::SeedableRng;
     use rand_xorshift::XorShiftRng;
+
+    use fr32::fr_into_bytes;
     use storage_proofs_core::{
         cache_key::CacheKey,
         compound_proof,
-        drgraph::{BucketGraph, BASE_DEGREE},
-        fr32::fr_into_bytes,
+        drgraph::{BASE_DEGREE, BucketGraph},
         hasher::{Hasher, PoseidonHasher},
         merkle::{BinaryMerkleTree, MerkleTreeTrait},
         proof::NoRequirements,
@@ -299,8 +298,10 @@ mod tests {
         util::default_rows_to_discard,
     };
 
-    use crate::stacked::BINARY_ARITY;
     use crate::{drg, PoRep};
+    use crate::stacked::BINARY_ARITY;
+
+    use super::*;
 
     #[test]
     #[ignore] // Slow test – run only when compiled for release.

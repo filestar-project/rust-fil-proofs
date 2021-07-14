@@ -1,12 +1,12 @@
 use std::marker::PhantomData;
 
+use bellperson::{Circuit, ConstraintSystem, SynthesisError};
 use bellperson::bls::{Bls12, Engine, Fr};
 use bellperson::gadgets::{
+    {multipack, num},
     boolean::Boolean,
     sha256::sha256 as sha256_circuit,
-    {multipack, num},
 };
-use bellperson::{Circuit, ConstraintSystem, SynthesisError};
 use ff::PrimeField;
 
 use storage_proofs_core::{
@@ -301,9 +301,6 @@ where
 
 #[cfg(test)]
 mod tests {
-
-    use super::*;
-
     use bellperson::util_cs::test_cs::TestConstraintSystem;
     use ff::Field;
     use generic_array::typenum;
@@ -311,11 +308,12 @@ mod tests {
     use pretty_assertions::assert_eq;
     use rand::SeedableRng;
     use rand_xorshift::XorShiftRng;
+
+    use fr32::{bytes_into_fr, fr_into_bytes};
     use storage_proofs_core::{
         cache_key::CacheKey,
         compound_proof,
-        drgraph::{graph_height, BucketGraph, BASE_DEGREE},
-        fr32::{bytes_into_fr, fr_into_bytes},
+        drgraph::{BASE_DEGREE, BucketGraph, graph_height},
         hasher::PoseidonHasher,
         merkle::MerkleProofTrait,
         proof::ProofScheme,
@@ -323,10 +321,12 @@ mod tests {
         util::{data_at_node, default_rows_to_discard},
     };
 
-    use super::super::compound::DrgPoRepCompound;
     use crate::drg;
-    use crate::stacked::BINARY_ARITY;
     use crate::PoRep;
+    use crate::stacked::BINARY_ARITY;
+
+    use super::*;
+    use super::super::compound::DrgPoRepCompound;
 
     #[test]
     fn drgporep_input_circuit_with_bls12_381() {

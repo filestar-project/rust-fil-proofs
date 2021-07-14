@@ -1,10 +1,12 @@
-use log::trace;
 use std::marker::PhantomData;
 
 use bellperson::bls::Fr;
+use log::trace;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use storage_proofs_core::{fr32::bytes_into_fr_repr_safe, hasher::Hasher};
+
+use fr32::bytes_into_fr_repr_safe;
+use storage_proofs_core::{hasher::Hasher};
 
 use crate::encode::encode;
 

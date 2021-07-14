@@ -157,7 +157,7 @@ mod tests {
     use rand_xorshift::XorShiftRng;
 
     use crate::drgraph::{BucketGraph, Graph, BASE_DEGREE};
-    use crate::fr32::fr_into_bytes;
+    use fr32::fr_into_bytes;
     use crate::hasher::{Blake2sHasher, PoseidonHasher, Sha256Hasher};
     use crate::merkle::{create_base_merkle_tree, DiskStore, MerkleProofTrait, MerkleTreeWrapper};
     use crate::util::data_at_node;

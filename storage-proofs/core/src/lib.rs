@@ -4,6 +4,8 @@
 #![allow(clippy::type_repetition_in_bounds)]
 #![warn(clippy::unwrap_used)]
 
+pub use self::data::Data;
+
 #[macro_use]
 pub mod test_helper;
 
@@ -13,7 +15,6 @@ pub mod crypto;
 pub mod data;
 pub mod drgraph;
 pub mod error;
-pub mod fr32;
 pub mod gadgets;
 pub mod hasher;
 pub mod measurements;
@@ -27,8 +28,6 @@ pub mod proof;
 pub mod sector;
 pub mod settings;
 pub mod util;
-
-pub use self::data::Data;
 
 #[cfg(test)]
 pub(crate) const TEST_SEED: [u8; 16] = [

@@ -178,11 +178,11 @@ pub fn default_rows_to_discard(leafs: usize, arity: usize) -> usize {
 mod tests {
     use super::*;
 
-    use crate::fr32::fr_into_bytes;
     use bellperson::bls::*;
     use bellperson::gadgets::num;
     use bellperson::util_cs::test_cs::TestConstraintSystem;
     use ff::Field;
+    use fr32::fr_into_bytes;
     use rand::{Rng, SeedableRng};
     use rand_xorshift::XorShiftRng;
 

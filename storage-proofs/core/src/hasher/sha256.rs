@@ -12,7 +12,6 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use super::{Domain, HashFunction, Hasher};
-use crate::crypto::sloth;
 use crate::error::*;
 use crate::gadgets::multipack;
 
@@ -25,19 +24,6 @@ impl Hasher for Sha256Hasher {
 
     fn name() -> String {
         "sha256_hasher".into()
-    }
-
-    fn sloth_encode(key: &Self::Domain, ciphertext: &Self::Domain) -> Result<Self::Domain> {
-        // TODO: validate this is how sloth should work in this case
-        let k = (*key).into();
-        let c = (*ciphertext).into();
-
-        Ok(sloth::encode(&k, &c).into())
-    }
-
-    fn sloth_decode(key: &Self::Domain, ciphertext: &Self::Domain) -> Result<Self::Domain> {
-        // TODO: validate this is how sloth should work in this case
-        Ok(sloth::decode(&(*key).into(), &(*ciphertext).into()).into())
     }
 }
 
@@ -352,7 +338,7 @@ impl From<Sha256Domain> for [u8; 32] {
 mod tests {
     use super::*;
 
-    use crate::fr32::fr_into_bytes;
+    use fr32::fr_into_bytes;
     use crate::util::bytes_into_boolean_vec;
     use bellperson::util_cs::test_cs::TestConstraintSystem;
 

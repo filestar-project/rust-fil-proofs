@@ -1,26 +1,27 @@
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
-use anyhow::{ensure, Context};
+use anyhow::{Context, ensure};
 use generic_array::typenum;
 use merkletree::store::{ReplicaConfig, StoreConfig};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+use fr32::bytes_into_fr_repr_safe;
 use storage_proofs_core::{
+    crypto::sloth,
+    Data,
     drgraph::Graph,
     error::Result,
-    fr32::bytes_into_fr_repr_safe,
-    hasher::{Domain, HashFunction, Hasher, PoseidonArity},
+    hasher::{Domain, Hasher, HashFunction, PoseidonArity},
     merkle::{
-        create_base_lcmerkle_tree, create_base_merkle_tree, BinaryLCMerkleTree, BinaryMerkleTree,
+        BinaryLCMerkleTree, BinaryMerkleTree, create_base_lcmerkle_tree, create_base_merkle_tree,
         LCMerkleTree, MerkleProof, MerkleProofTrait, MerkleTreeTrait,
     },
     parameter_cache::ParameterSetMetadata,
     proof::{NoRequirements, ProofScheme},
     util::{data_at_node, data_at_node_offset, NODE_SIZE},
-    Data,
 };
 
 use crate::{encode, PoRep};
@@ -466,7 +467,7 @@ where
             let end = start + NODE_SIZE;
 
             let node_data = <H as Hasher>::Domain::try_from_bytes(&data.as_ref()[start..end])?;
-            let encoded = H::sloth_encode(key.as_ref(), &node_data)?;
+            let encoded: H::Domain = sloth_encode::<H>(key.as_ref(), &node_data);
 
             encoded.write_bytes(&mut data.as_mut()[start..end])?;
         }
@@ -603,18 +604,25 @@ pub fn replica_id<H: Hasher>(prover_id: [u8; 32], sector_id: [u8; 32]) -> H::Dom
     H::Function::hash_leaf(&to_hash)
 }
 
+fn sloth_encode<H: Hasher>(key: &H::Domain, ciphertext: &H::Domain) -> H::Domain {
+    // TODO: validate this is how sloth should work in this case
+    let k = (*key).into();
+    let c = (*ciphertext).into();
+
+    sloth::encode(&k, &c).into()
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use bellperson::bls::Fr;
     use ff::Field;
     use rand::SeedableRng;
     use rand_xorshift::XorShiftRng;
+
+    use fr32::fr_into_bytes;
     use storage_proofs_core::{
         cache_key::CacheKey,
-        drgraph::{BucketGraph, BASE_DEGREE},
-        fr32::fr_into_bytes,
+        drgraph::{BASE_DEGREE, BucketGraph},
         hasher::{Blake2sHasher, Sha256Hasher},
         merkle::{BinaryMerkleTree, MerkleTreeTrait},
         table_tests,
@@ -623,6 +631,8 @@ mod tests {
     };
 
     use crate::stacked::BINARY_ARITY;
+
+    use super::*;
 
     fn test_extract_all<Tree: MerkleTreeTrait>() {
         let rng = &mut XorShiftRng::from_seed(crate::TEST_SEED);

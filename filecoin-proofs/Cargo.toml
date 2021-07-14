@@ -45,6 +45,8 @@ indicatif = "0.15.0"
 groupy = "0.3.0"
 dialoguer = "0.8.0"
 clap = "2.33.3"
+byte-slice-cast = "1.0.0"
+fr32 = { path = "../fr32", default-features = false }
 
 [dependencies.reqwest]
 version = "0.10"
@@ -64,9 +66,9 @@ cpu-profile = ["gperftools"]
 heap-profile = ["gperftools/heap"]
 simd = ["storage-proofs/simd"]
 asm = ["storage-proofs/asm"]
-gpu = ["storage-proofs/gpu", "bellperson/gpu"]
-pairing = ["storage-proofs/pairing", "bellperson/pairing"]
-blst = ["storage-proofs/blst", "bellperson/blst"]
+gpu = ["storage-proofs/gpu", "bellperson/gpu", "fr32/gpu"]
+pairing = ["storage-proofs/pairing", "bellperson/pairing", "fr32/pairing"]
+blst = ["storage-proofs/blst", "bellperson/blst", "fr32/blst"]
 
 [[bench]]
 name = "preprocessing"

@@ -1,27 +1,35 @@
-use lazy_static::lazy_static;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
-use std::sync::{mpsc, Arc, Mutex, RwLock};
+use std::sync::{Arc, mpsc, Mutex, RwLock};
 
 use anyhow::Context;
 use bellperson::bls::Fr;
 use bincode::deserialize;
+use ff::Field;
+use generic_array::{GenericArray, sequence::GenericSequence};
 use generic_array::typenum::{self, Unsigned};
+use lazy_static::lazy_static;
 use log::*;
 use merkletree::merkle::{
     get_merkle_tree_cache_size, get_merkle_tree_leafs, get_merkle_tree_len,
     is_merkle_tree_size_valid,
 };
 use merkletree::store::{DiskStore, StoreConfig};
+use neptune::batch_hasher::BatcherType;
+use neptune::column_tree_builder::{ColumnTreeBuilder, ColumnTreeBuilderTrait};
+use neptune::tree_builder::{TreeBuilder, TreeBuilderTrait};
 use rayon::prelude::*;
+use typenum::{U11, U2, U5, U8};
+
+use fr32::fr_into_bytes;
 use storage_proofs_core::{
     cache_key::CacheKey,
     data::Data,
     drgraph::Graph,
     error::Result,
-    hasher::{Domain, HashFunction, Hasher, PoseidonArity},
+    hasher::{Domain, Hasher, HashFunction, PoseidonArity},
     measurements::{
         measure_op,
         Operation::{CommD, EncodeWindowTimeAll, GenerateTreeC, GenerateTreeRLast},
@@ -30,30 +38,22 @@ use storage_proofs_core::{
     settings,
     util::{default_rows_to_discard, NODE_SIZE},
 };
-use typenum::{U11, U2, U5, U8};
+
+use crate::encode::{decode, encode};
+use crate::PoRep;
 
 use super::{
     challenges::LayerChallenges,
     column::Column,
     create_label,
+    EncodingProof,
     graph::StackedBucketGraph,
     hash::hash_single_column,
-    params::{
-        get_node, Labels, LabelsCache, PersistentAux, Proof, PublicInputs, PublicParams,
-        ReplicaColumnProof, Tau, TemporaryAux, TemporaryAuxCache, TransformedLayers, BINARY_ARITY,
+    LabelingProof, params::{
+        BINARY_ARITY, get_node, Labels, LabelsCache, PersistentAux, Proof, PublicInputs,
+        PublicParams, ReplicaColumnProof, Tau, TemporaryAux, TemporaryAuxCache, TransformedLayers,
     },
-    EncodingProof, LabelingProof,
 };
-
-use ff::Field;
-use generic_array::{sequence::GenericSequence, GenericArray};
-use neptune::batch_hasher::BatcherType;
-use neptune::column_tree_builder::{ColumnTreeBuilder, ColumnTreeBuilderTrait};
-use neptune::tree_builder::{TreeBuilder, TreeBuilderTrait};
-use storage_proofs_core::fr32::fr_into_bytes;
-
-use crate::encode::{decode, encode};
-use crate::PoRep;
 
 pub const TOTAL_PARENTS: usize = 37;
 
@@ -1383,25 +1383,26 @@ impl<'a, Tree: 'static + MerkleTreeTrait, G: 'static + Hasher> StackedDrg<'a, Tr
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use bellperson::bls::{Fr, FrRepr};
     use ff::{Field, PrimeField};
     use rand::{Rng, SeedableRng};
     use rand_xorshift::XorShiftRng;
-    use storage_proofs_core::hasher::poseidon::PoseidonHasher;
+
+    use fr32::fr_into_bytes;
     use storage_proofs_core::{
         drgraph::BASE_DEGREE,
-        fr32::fr_into_bytes,
         hasher::{Blake2sHasher, Sha256Hasher},
         merkle::MerkleTreeTrait,
         proof::ProofScheme,
         table_tests,
         test_helper::setup_replica,
     };
+    use storage_proofs_core::hasher::poseidon::PoseidonHasher;
 
-    use crate::stacked::{PrivateInputs, SetupParams, EXP_DEGREE};
     use crate::PoRep;
+    use crate::stacked::{EXP_DEGREE, PrivateInputs, SetupParams};
+
+    use super::*;
 
     const DEFAULT_STACKED_LAYERS: usize = 11;
 

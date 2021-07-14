@@ -42,6 +42,7 @@ neptune = { git = "https://github.com/filestar-project/neptune.git", tag = "v3.0
 cpu-time = { version = "1.0", optional = true }
 gperftools = { version = "0.2", optional = true }
 num_cpus = "1.10.1"
+fr32 = { path = "../../fr32", default-features = false }
 
 [dev-dependencies]
 proptest = "0.10"
@@ -56,11 +57,11 @@ default = ["gpu", "pairing"]
 simd = []
 asm = ["sha2/sha2-asm"]
 big-sector-sizes-bench = []
-gpu = ["bellperson/gpu"]
 measurements = ["cpu-time", "gperftools"]
 profile = ["measurements"]
-pairing = ["bellperson/pairing", "neptune/pairing", "bellperson/pairing-serde"]
-blst = ["bellperson/blst", "neptune/blst", "bellperson/blst-serde"]
+gpu = ["bellperson/gpu", "fr32/gpu"]
+pairing = ["bellperson/pairing", "neptune/pairing", "bellperson/pairing-serde", "fr32/pairing"]
+blst = ["bellperson/blst", "neptune/blst", "bellperson/blst-serde", "fr32/blst"]
 
 [[bench]]
 name = "sha256"
@@ -76,10 +77,6 @@ harness = false
 
 [[bench]]
 name = "xor"
-harness = false
-
-[[bench]]
-name = "fr"
 harness = false
 
 [[bench]]

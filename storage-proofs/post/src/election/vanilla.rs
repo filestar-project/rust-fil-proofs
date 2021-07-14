@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 use std::marker::PhantomData;
 
-use anyhow::{bail, ensure, Context};
+use anyhow::{bail, Context, ensure};
 use bellperson::bls::Fr;
 use byteorder::{ByteOrder, LittleEndian};
 use generic_array::typenum;
@@ -12,10 +12,10 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use typenum::Unsigned;
 
+use fr32::fr_into_bytes;
 use storage_proofs_core::{
     error::{Error, Result},
-    fr32::fr_into_bytes,
-    hasher::{Domain, HashFunction, Hasher, PoseidonDomain, PoseidonFunction, PoseidonMDArity},
+    hasher::{Domain, Hasher, HashFunction, PoseidonDomain, PoseidonFunction, PoseidonMDArity},
     measurements::{measure_op, Operation},
     merkle::{MerkleProof, MerkleProofTrait, MerkleTreeTrait, MerkleTreeWrapper},
     parameter_cache::ParameterSetMetadata,
@@ -448,8 +448,6 @@ impl<'a, Tree: 'static + MerkleTreeTrait> ProofScheme<'a> for ElectionPoSt<'a, T
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use rand::SeedableRng;
     use rand_xorshift::XorShiftRng;
     use typenum::{U0, U2, U8};
@@ -458,6 +456,8 @@ mod tests {
         hasher::PoseidonHasher,
         merkle::{generate_tree, get_base_tree_count, LCTree},
     };
+
+    use super::*;
 
     fn test_election_post<Tree: 'static + MerkleTreeTrait>() {
         let rng = &mut XorShiftRng::from_seed(crate::TEST_SEED);

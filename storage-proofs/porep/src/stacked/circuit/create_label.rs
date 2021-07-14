@@ -1,6 +1,7 @@
-use bellperson::gadgets::{boolean::Boolean, num, sha256::sha256 as sha256_circuit, uint32};
 use bellperson::{bls::Engine, ConstraintSystem, SynthesisError};
+use bellperson::gadgets::{boolean::Boolean, num, sha256::sha256 as sha256_circuit, uint32};
 use ff::PrimeField;
+
 use storage_proofs_core::{gadgets::multipack, gadgets::uint64, util::reverse_bit_numbering};
 
 use crate::stacked::vanilla::TOTAL_PARENTS;
@@ -65,23 +66,24 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use bellperson::bls::{Bls12, Fr};
     use bellperson::gadgets::boolean::Boolean;
     use bellperson::util_cs::test_cs::TestConstraintSystem;
     use ff::Field;
     use rand::SeedableRng;
     use rand_xorshift::XorShiftRng;
+
+    use fr32::{bytes_into_fr, fr_into_bytes};
     use storage_proofs_core::{
-        drgraph::{Graph, BASE_DEGREE},
-        fr32::{bytes_into_fr, fr_into_bytes},
+        drgraph::{BASE_DEGREE, Graph},
         hasher::Sha256Hasher,
-        util::bytes_into_boolean_vec_be,
         util::{data_at_node, NODE_SIZE},
+        util::bytes_into_boolean_vec_be,
     };
 
-    use crate::stacked::vanilla::{create_label, StackedBucketGraph, EXP_DEGREE, TOTAL_PARENTS};
+    use crate::stacked::vanilla::{create_label, EXP_DEGREE, StackedBucketGraph, TOTAL_PARENTS};
+
+    use super::*;
 
     #[test]
     fn test_create_label() {
