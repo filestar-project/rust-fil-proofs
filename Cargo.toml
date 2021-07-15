@@ -9,5 +9,4 @@ members = [
   "fil-proofs-tooling",
   "fr32",
   "sha2raw",
-  "phase2",
 ]
